@@ -1,0 +1,1 @@
+Simpan gambar foto profil, logo, atau foto kegiatan di folder ini.

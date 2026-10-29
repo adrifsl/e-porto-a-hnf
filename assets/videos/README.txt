@@ -1,0 +1,1 @@
+Simpan file video praktik mengajar (.mp4) di folder ini jika tidak menggunakan YouTube.
