@@ -695,8 +695,7 @@ select:focus {
 #lb {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(10px);
+    background: rgba(15, 23, 42, 0.92);
     display: grid;
     place-items: center;
     z-index: 1100;
@@ -705,9 +704,7 @@ select:focus {
 }
 
 #lb[hidden] {
-    opacity: 0;
-    pointer-events: none;
-    display: grid !important;
+    display: none !important;
 }
 
 #lb img {
@@ -786,4 +783,14 @@ body.modal-open { overflow: hidden; }
     padding: 0.3rem 0.6rem;
     border-radius: 999px;
     pointer-events: none;
+}
+
+#modal-view { visibility: hidden; }
+#modal-view.show { visibility: visible; }
+
+/* HP: matikan semua blur latar & smooth-scroll bawaan */
+@media (max-width: 768px) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+    body { overflow-x: clip; }
 }
