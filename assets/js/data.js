@@ -13,7 +13,7 @@ const siteData = {
     "logo": "./assets/images/media-identitas-logo.png"
   },
   "profil": {
-    "ringkasan": "Mahasiswa PPG Prajabatan Semester 2 bidang studi Informatika di Universitas Muhammadiyah Surakarta. Bervisi unggul, adaptif dan menjadi pendidik profesional",
+    "ringkasan": "Perkenalkan nama saya Aditya Hanif, biasa dipanggil Hanif. Saya lahir pada 1 Agustus 2000 dan berasal dari Kabupaten Magetan, Jawa Timur. Saya menempuh S1 di Universitas Muhammadiyah Surakarta dari prodi Pendidikan Teknik Informatika, saat ini sedang menjalani program PPG Prajabatan bidang studi Informatika di Universitas Muhammadiyah Surakarta. Bervisi unggul, adaptif dan menjadi pendidik profesional",
     "latar": "E-Portofolio ini disusun untuk mendokumentasikan dan menghubungkan perencanaan pembelajaran, pelaksanaan praktik, asesmen, umpan balik, refleksi, dan tindak lanjut sebagai bukti perkembangan kompetensi calon guru.",
     "konteks": "PPL Mandiri dilaksanakan di SMP Muhammadiyah Program Khusus Surakarta pada Semester 2 PPG Prajabatan.",
     "peran": "Praktikan pembelajaran lapangan mengajar smp dimana ini menjadi bekal pengalaman saya untuk terus meningkatkan kualitas pembelajaran",

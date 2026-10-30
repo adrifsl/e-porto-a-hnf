@@ -8,36 +8,45 @@ const ph = t => `<p class="ph">[${esc(t)}]</p>`;
 const txt = (s, p) => s && s.trim() ? `<p>${esc(s).replace(/\n/g, "<br>")}</p>` : ph(p || "Tambahkan isi di sini");
 const sec = (h, t) => `<section class="blk fade-up"><h3>${h}</h3>${txt(t)}</section>`;
 
+const tile = (icon, label) => `<div class="card-media"><div class="media-tile"><span class="mt-ic">${icon}</span><span class="mt-lb">${label}</span></div></div>`;
+
+// Pratinjau iframe: dimuat saat mendekati layar (data-src), tidak menangkap sentuhan, ketuk = buka layar penuh
+const frame = (u, src) => `<div class="card-media has-pv" data-modal-pv="${esc(u)}"><iframe class="lazy-pv" data-src="${src}" title="Pratinjau" tabindex="-1" allowfullscreen></iframe></div>`;
+
 function getMediaThumbnail(u) {
   u = U(u);
-  if (!u) return `<div class="card-media" style="background:rgba(255,255,255,0.5); display:grid; place-items:center; color:#64748b;">[Tanpa Media]</div>`;
+  if (!u) return `<div class="card-media"><div class="media-tile"><span class="mt-lb">[Tanpa Media]</span></div></div>`;
   let m;
-  
-  if (m = u.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/)) {
-    return `<div class="card-media"><iframe loading="lazy" src="https://docs.google.com/presentation/d/${m[1]}/embed?start=false&loop=false&delayms=3000" allowfullscreen="true"></iframe></div>`;
-  }
-  if (m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/)) {
-    return `<div class="card-media"><iframe loading="lazy" src="https://drive.google.com/file/d/${m[1]}/preview" allowfullscreen></iframe></div>`;
-  }
-  if (m = u.match(/docs\.google\.com\/(?:document|spreadsheets)\/d\/([\w-]+)/)) {
-    return `<div class="card-media"><iframe loading="lazy" src="https://docs.google.com/document/d/${m[1]}/preview" allowfullscreen></iframe></div>`;
-  }
-  if (m = u.match(/(?:youtu\.be\/|[?&]v=)([\w-]{11})/)) {
-    return `<div class="card-media"><iframe loading="lazy" src="https://www.youtube.com/embed/${m[1]}" allowfullscreen></iframe></div>`;
-  }
+  if (m = u.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/)) return frame(u, `https://docs.google.com/presentation/d/${m[1]}/embed?start=false&loop=false&delayms=3000`);
+  if (m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/)) return frame(u, `https://drive.google.com/file/d/${m[1]}/preview`);
+  if (m = u.match(/docs\.google\.com\/(?:document|spreadsheets)\/d\/([\w-]+)/)) return frame(u, `https://docs.google.com/document/d/${m[1]}/preview`);
+  if (m = u.match(/(?:youtu\.be\/|[?&]v=)([\w-]{11})/)) return frame(u, `https://www.youtube.com/embed/${m[1]}`);
   if (/^data:image|\.(png|jpe?g|gif|webp|svg|bmp)(\?|$)/i.test(u)) {
-    return `<div class="card-media"><img loading="lazy" src="${esc(u)}" alt="Gambar"></div>`;
+    return `<div class="card-media"><img loading="lazy" decoding="async" src="${esc(u)}" alt="Gambar"></div>`;
   }
   if (/\.(mp4|webm|ogg|mov)(\?|$)/i.test(u) || /^data:video/i.test(u)) {
-    return `<div class="card-media"><video controls preload="metadata" src="${esc(u)}"></video></div>`;
+    return `<div class="card-media"><video controls preload="none" playsinline src="${esc(u)}"></video></div>`;
   }
   if (/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i.test(u) || /^data:audio/i.test(u)) {
-    return `<div class="card-media audio-only" style="background:#f1f5f9;"><audio controls style="width:80%;" src="${esc(u)}"></audio></div>`;
+    return `<div class="card-media audio-only" style="background:#f1f5f9;"><audio controls preload="none" style="width:80%;" src="${esc(u)}"></audio></div>`;
   }
-  if (/\.pdf(\?|$)/i.test(u)) {
-    return `<div class="card-media"><iframe loading="lazy" src="${esc(u)}"></iframe></div>`;
-  }
-  return `<div class="card-media" style="background:rgba(255,255,255,0.5); display:grid; place-items:center; color:#334155; font-weight:600;">[Tautan Eksternal]</div>`;
+  if (/\.pdf(\?|$)/i.test(u)) return frame(u, esc(u));
+  return tile("🔗", "Tautan Eksternal");
+}
+
+// Muat iframe pratinjau hanya ketika sudah dekat dengan layar
+function initLazyFrames() {
+  const frames = document.querySelectorAll('iframe.lazy-pv[data-src]');
+  if (!('IntersectionObserver' in window)) { frames.forEach(f => { f.src = f.dataset.src; f.removeAttribute('data-src'); }); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const f = en.target;
+      if (f.dataset.src) { f.src = f.dataset.src; f.removeAttribute('data-src'); }
+      io.unobserve(f);
+    });
+  }, { rootMargin: '150px 0px 150px 0px', threshold: 0 });
+  frames.forEach(f => io.observe(f));
 }
 
 function media(u, t = "") {
@@ -127,7 +136,7 @@ function renderOnePage() {
       return `<section class="blk fade-up">
         <h3>${title}</h3>
         <div class="card-media" style="margin-top:1.2rem; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.4); box-shadow: 0 10px 25px rgba(0,0,0,0.05); height:240px; width:100%;">
-            ${thumb.replace('class="card-media"', 'style="width:100%; height:100%;"')}
+            ${thumb.replace('class="card-media', 'style="width:100% !important; height:100% !important;" class="card-media')}
         </div>
         <div class="ac" style="margin-top:1.2rem;">
           <button class="btn" data-modal-pv="${esc(u)}" data-modal-title="${esc(title)}">🔍 Layar Penuh</button>
@@ -216,7 +225,7 @@ function renderOnePage() {
           <div style="margin-top:0.5rem;">
             ${u.url ? `
               <div class="card-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.4); height:240px; width:100%; box-shadow:0 8px 20px rgba(0,0,0,0.05);">
-                  ${thumb.replace('class="card-media"', 'style="width:100%; height:100%;"')}
+                  ${thumb.replace('class="card-media', 'style="width:100% !important; height:100% !important;" class="card-media')}
               </div>
               <div class="ac"><button class="btn" data-modal-pv="${esc(u.url)}" data-modal-title="${esc(u.sumber)}">🔍 Tampilkan Fokus</button></div>
             ` : '<div class="empty">Tidak ada lampiran</div>'}
@@ -270,7 +279,9 @@ function switchSiklus(id) {
 }
 
 function initScrollAnimations() {
-  const elements = document.querySelectorAll('.fade-up');
+  initLazyFrames();
+  const elements = document.querySelectorAll('.fade-up:not(.visible)');
+  if (!('IntersectionObserver' in window)) { elements.forEach(el => el.classList.add('visible')); return; }
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -278,38 +289,38 @@ function initScrollAnimations() {
         observer.unobserve(entry.target); 
       }
     });
-  }, { rootMargin: '0px 0px -50px 0px', threshold: 0.05 });
+  }, { rootMargin: '200px 0px 200px 0px', threshold: 0 });
   elements.forEach(el => observer.observe(el));
 }
 
 // Perbaikan ScrollSpy Berbasis Posisi Murni (Akurat untuk Beranda & Menu Lain)
 function setupScrollSpy() {
-  const sections = document.querySelectorAll('.page-section');
-  const navLinks = document.querySelectorAll('#nav a');
+  const sections = Array.from(document.querySelectorAll('.page-section'));
+  const navLinks = Array.from(document.querySelectorAll('#nav a'));
+  let ticking = false, last = '';
+
+  const update = () => {
+    ticking = false;
+    const y = window.scrollY;
+    let current = 'beranda';
+    if (y >= 150) {
+      const pos = y + 200;
+      for (const sc of sections) {
+        if (pos >= sc.offsetTop && pos < sc.offsetTop + sc.offsetHeight) { current = sc.id; break; }
+      }
+    }
+    if (current === last) return;   // tidak menyentuh DOM kalau tidak berubah
+    last = current;
+    navLinks.forEach(link => {
+      if (link.getAttribute('href') === '#' + current) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  };
 
   window.addEventListener('scroll', () => {
-    let current = 'beranda';
-    const scrollPos = window.scrollY + 200;
-
-    if (window.scrollY < 150) {
-      current = 'beranda';
-    } else {
-      sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-          current = section.getAttribute('id');
-        }
-      });
-    }
-
-    navLinks.forEach(link => {
-      link.removeAttribute('aria-current');
-      if (link.getAttribute('href') === '#' + current) {
-        link.setAttribute('aria-current', 'page');
-      }
-    });
-  });
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  update();
 }
 
 function chrome() {
@@ -347,6 +358,7 @@ function openModal(url, title) {
   }
   $("#modal-title").textContent = title;
   $("#modal-body-content").innerHTML = media(url, title);
+  document.body.classList.add("modal-open");
   setTimeout(() => modal.classList.add("show"), 10);
 }
 
@@ -354,16 +366,22 @@ function closeModal() {
   const modal = $("#modal-view");
   if (modal) {
     modal.classList.remove("show");
+    document.body.classList.remove("modal-open");
     setTimeout(() => { const body = $("#modal-body-content"); if (body) body.innerHTML = ""; }, 400);
   }
 }
 
 document.addEventListener("input", e => { if (e.target.closest(".flt")) fillDocs(); });
 document.addEventListener("keydown", e => { if (e.key == "Escape") { const lb = $("#lb"); if (lb) lb.setAttribute("hidden", "true"); closeModal(); } });
+let topTick = false;
 window.addEventListener("scroll", () => {
-  const topBtn = $("#top");
-  if (topBtn) { if (window.scrollY > 500) topBtn.classList.add("show"); else topBtn.classList.remove("show"); }
-});
+  if (topTick) return; topTick = true;
+  requestAnimationFrame(() => {
+    topTick = false;
+    const topBtn = $("#top");
+    if (topBtn) topBtn.classList.toggle("show", window.scrollY > 500);
+  });
+}, { passive: true });
 document.addEventListener("DOMContentLoaded", () => {
   chrome(); renderOnePage();
   if (window.location.hash) {
