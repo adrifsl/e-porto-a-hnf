@@ -71,21 +71,21 @@ const siteData = {
       "judul": "Instrumen dan rubrik",
       "kategori": "Instrumen dan Rubrik",
       "deskripsi": "Perangkat penilaian yang dirancang untuk mengukur pemahaman konsep teoretis, kemampuan praktik teknis, serta sikap kolaboratif peserta didik.\n\nRubrik Penilaian Praktik/Proyek: Menilai ketepatan langkah kerja, fungsionalitas program atau hasil kerja digital, kreativitas, dan kerapian penyelesaian tugas.\n\nLembar Observasi Sikap: Mengukur dimensi Profil Pelajar Pancasila, seperti bernalar kritis saat memecahkan masalah (problem solving / debugging), mandiri, dan gotong royong dalam kerja kelompok.\n\nLembar Kerja Peserta Didik (LKPD): Panduan kerja praktis berbasis proyek (project-based learning) yang membimbing siswa secara terstruktur.",
-      "url": "./assets/images/media-asesmen0-url.png"
+      "url": "./assets/images/media-asesmen0-url.jpg"
     },
     {
       "id": "mvtwkdjy",
       "judul": "Hasil Asesmen",
       "kategori": "Bukti atau Hasil Asesmen",
       "deskripsi": "Dokumentasi autentik berupa artefak digital dan hasil karya nyata peserta didik selama proses pembelajaran Informatika",
-      "url": "./assets/images/media-asesmen1-url.png"
+      "url": "./assets/images/media-asesmen1-url.jpg"
     },
     {
       "id": "mvtwkw71",
       "judul": "Analisis Hasil Belajar",
       "kategori": "Analisis Hasil Belajar",
       "deskripsi": "Evaluasi komprehensif berdasarkan perolehan nilai formatif dan sumatif untuk mengukur ketercapaian tujuan pembelajaran.\n\n- Sebagian besar peserta didik telah mampu menguasai konsep dasar dan menunjukkan keterampilan praktik yang sesuai dengan indikator pencapaian kompetensi.\n- Sebagian kecil siswa memerlukan bimbingan lanjutan, khususnya pada materi yang membutuhkan ketelitian logika atau pemecahan masalah yang lebih kompleks.\n- Hasil analisis ini dimanfaatkan sebagai acuan untuk merancang perlakuan belajar berikutnya.",
-      "url": "./assets/images/media-asesmen2-url.png"
+      "url": "./assets/images/media-asesmen2-url.jpg"
     },
     {
       "id": "mvtwn7ku",
@@ -160,7 +160,7 @@ const siteData = {
       "kategori": "Foto Kegiatan",
       "siklus": "1",
       "deskripsi": "",
-      "url": "./assets/images/media-dokumen0-url.png"
+      "url": "./assets/images/media-dokumen0-url.jpg"
     },
     {
       "id": "mvtp2mco",

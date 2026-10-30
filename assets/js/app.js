@@ -10,19 +10,29 @@ const sec = (h, t) => `<section class="blk fade-up"><h3>${h}</h3>${txt(t)}</sect
 
 const tile = (icon, label) => `<div class="card-media"><div class="media-tile"><span class="mt-ic">${icon}</span><span class="mt-lb">${label}</span></div></div>`;
 
-// Pratinjau iframe: dimuat saat mendekati layar (data-src), tidak menangkap sentuhan, ketuk = buka layar penuh
-const frame = (u, src) => `<div class="card-media has-pv" data-modal-pv="${esc(u)}"><iframe class="lazy-pv" data-src="${src}" title="Pratinjau" tabindex="-1" allowfullscreen></iframe></div>`;
+// HP / layar sentuh: pratinjau berupa GAMBAR (ringan). Desktop: iframe hidup yang dimuat bertahap.
+const LITE = window.matchMedia ? window.matchMedia('(max-width: 768px), (pointer: coarse)').matches : false;
+const FALLBACK = "this.onerror=null;this.outerHTML='<div class=media-tile><span class=mt-ic>📄</span><span class=mt-lb>Ketuk untuk membuka</span></div>'";
+
+// thumb = alamat gambar pratinjau (untuk HP), src = alamat embed (untuk desktop)
+const frame = (u, src, thumb) => LITE && thumb
+  ? `<div class="card-media has-pv" data-modal-pv="${esc(u)}"><img class="gthumb" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(thumb)}" alt="Pratinjau" onerror="${FALLBACK}"></div>`
+  : LITE
+    ? tile("📕", "Ketuk untuk membuka")
+    : `<div class="card-media has-pv" data-modal-pv="${esc(u)}"><iframe class="lazy-pv" data-src="${esc(src)}" title="Pratinjau" tabindex="-1" allowfullscreen></iframe></div>`;
+
+const gThumb = id => `https://drive.google.com/thumbnail?id=${id}&sz=w800`;
 
 function getMediaThumbnail(u) {
   u = U(u);
   if (!u) return `<div class="card-media"><div class="media-tile"><span class="mt-lb">[Tanpa Media]</span></div></div>`;
   let m;
-  if (m = u.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/)) return frame(u, `https://docs.google.com/presentation/d/${m[1]}/embed?start=false&loop=false&delayms=3000`);
-  if (m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/)) return frame(u, `https://drive.google.com/file/d/${m[1]}/preview`);
-  if (m = u.match(/docs\.google\.com\/(?:document|spreadsheets)\/d\/([\w-]+)/)) return frame(u, `https://docs.google.com/document/d/${m[1]}/preview`);
-  if (m = u.match(/(?:youtu\.be\/|[?&]v=)([\w-]{11})/)) return frame(u, `https://www.youtube.com/embed/${m[1]}`);
+  if (m = u.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/)) return frame(u, `https://docs.google.com/presentation/d/${m[1]}/embed?start=false&loop=false&delayms=3000`, gThumb(m[1]));
+  if (m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/)) return frame(u, `https://drive.google.com/file/d/${m[1]}/preview`, gThumb(m[1]));
+  if (m = u.match(/docs\.google\.com\/(?:document|spreadsheets)\/d\/([\w-]+)/)) return frame(u, `https://docs.google.com/document/d/${m[1]}/preview`, gThumb(m[1]));
+  if (m = u.match(/(?:youtu\.be\/|[?&]v=)([\w-]{11})/)) return frame(u, `https://www.youtube.com/embed/${m[1]}`, `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg`);
   if (/^data:image|\.(png|jpe?g|gif|webp|svg|bmp)(\?|$)/i.test(u)) {
-    return `<div class="card-media"><img loading="lazy" decoding="async" src="${esc(u)}" alt="Gambar"></div>`;
+    return `<div class="card-media"><img decoding="async" src="${esc(u)}" alt="Gambar"></div>`;
   }
   if (/\.(mp4|webm|ogg|mov)(\?|$)/i.test(u) || /^data:video/i.test(u)) {
     return `<div class="card-media"><video controls preload="none" playsinline src="${esc(u)}"></video></div>`;
@@ -30,7 +40,7 @@ function getMediaThumbnail(u) {
   if (/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i.test(u) || /^data:audio/i.test(u)) {
     return `<div class="card-media audio-only" style="background:#f1f5f9;"><audio controls preload="none" style="width:80%;" src="${esc(u)}"></audio></div>`;
   }
-  if (/\.pdf(\?|$)/i.test(u)) return frame(u, esc(u));
+  if (/\.pdf(\?|$)/i.test(u)) return frame(u, u, null);
   return tile("🔗", "Tautan Eksternal");
 }
 
@@ -331,7 +341,7 @@ function setupScrollSpy() {
 function chrome() {
   const i = D.identitas; const lg = $("#lg"), bt = $("#bt"), ft = $("#ft"), nav = $("#nav");
   if (lg) lg.innerHTML = i.logo ? `<img src="${esc(U(i.logo))}" alt="Logo">` : "IF";
-  if (bt) bt.textContent = i.judul; if (ft) ft.textContent = i.footer; document.title = i.judul;
+  if (bt) bt.textContent = i.judul; if (ft) { ft.textContent = i.footer; const v = document.createElement("small"); v.style.cssText = "display:block;opacity:.5;margin-top:.5rem"; v.textContent = "build 8 \u2022 " + (LITE ? "mode ringan" : "mode penuh"); ft.appendChild(v); } document.title = i.judul;
   if (nav) nav.innerHTML = NAV.map(n => `<a href="${n[0].endsWith('.html') ? n[0] : '#' + n[0]}" data-n="${n[0]}">${n[1]}</a>`).join("");
 }
 
