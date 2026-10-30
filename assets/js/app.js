@@ -37,15 +37,20 @@ function getMediaThumbnail(u) {
 // Muat iframe pratinjau hanya ketika sudah dekat dengan layar
 function initLazyFrames() {
   const frames = document.querySelectorAll('iframe.lazy-pv[data-src]');
-  if (!('IntersectionObserver' in window)) { frames.forEach(f => { f.src = f.dataset.src; f.removeAttribute('data-src'); }); return; }
+  const load = f => { if (f.dataset.src) { f.src = f.dataset.src; f.removeAttribute('data-src'); } };
+  if (!('IntersectionObserver' in window)) { frames.forEach(load); return; }
+  const timers = new WeakMap();
   const io = new IntersectionObserver((entries) => {
     entries.forEach(en => {
-      if (!en.isIntersecting) return;
       const f = en.target;
-      if (f.dataset.src) { f.src = f.dataset.src; f.removeAttribute('data-src'); }
-      io.unobserve(f);
+      if (en.isIntersecting) {
+        if (timers.has(f)) return;
+        timers.set(f, setTimeout(() => { timers.delete(f); load(f); io.unobserve(f); }, 400));
+      } else if (timers.has(f)) {
+        clearTimeout(timers.get(f)); timers.delete(f);
+      }
     });
-  }, { rootMargin: '150px 0px 150px 0px', threshold: 0 });
+  }, { rootMargin: '0px', threshold: 0.1 });
   frames.forEach(f => io.observe(f));
 }
 
